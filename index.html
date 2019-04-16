@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>shopping-cart-product-restriction-by-state</title>
+
+    <style>
+        /* Main Container */
+
+        .flex-container {
+            justify-content: center;
+            z-index: 5;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(211, 211, 211, 0.5);
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
+
+        /* Sub Container */
+
+        .flex-container>div {
+            border: 1px solid #c90a00;
+            background-color: white;
+            width: 70%;
+            height: 34%;
+            margin: 10px;
+            padding: 20px;
+
+        }
+
+        /* H1 */
+
+        h1#modal-h1-foie-gras-ban {
+            font-size: 34px;
+            text-align: center;
+        }
+
+        /* Paragraph */
+
+        p#modal-p-foie-gras-ban {
+            font-size: 14px !important;
+            text-align: justify;
+        }
+
+        /* 'X' Button */
+
+        #modal-x-foie-gras-ban-x {
+            float: right;
+        }
+
+        /* 'Close' Button */
+
+        #modal-x-foie-gras-ban-close {
+            width: 100%;
+            margin: auto;
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* 'X' and 'Close' Button */
+
+        .modal-x-foie-gras-ban {
+            font-size: 20px;
+            font-weight: 300;
+            color: #c90a00;
+
+        }
+
+        .modal-x-foie-gras-ban:hover {
+            font-weight: bold;
+        }
+
+        /* Foie Gras Ban reminder message after the modal has been closed */
+
+        .foie-gras-message {
+            border: 1px solid #c90a00;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- DELIVERY NOTE MESSAGE-->
+    <p style="color:#000000;font-size:1em;">
+        <span style="font-weight:bold;">GRAY</span> dates are unavailable for delivery.
+        <br>
+        <span style="color:#c90a00;font-weight:bold;">RED </span> (Standard Dates) are always available for delivery.
+    </p>
+    <!-- END OF MESSAGE-->
+
+    <!-- Foie Gras Ban Modal -->
+    <div id="showFoieGrasBanModal" class="flex-container" style="display:none;">
+        <div>
+            <span onclick="CloseModalFunction()" id="modal-x-foie-gras-ban-x" class="modal-x-foie-gras-ban">x</span>
+            <h1 id="modal-h1-foie-gras-ban">California Foie Gras Ban</h1>
+            <p id="modal-p-foie-gras-ban">
+                Dear Customer, This product cannot be shipped to your state. Thank you, The Company
+            </p>
+            <span onclick="CloseModalFunction()" id="modal-x-foie-gras-ban-close" class="modal-x-foie-gras-ban">Close</span>
+        </div>
+    </div>
+
+    <!-- Foie Gran Ban Reminder Message To Remove Products from Cart-->
+    <div id="showFoieGrasBanMessage" class="foie-gras-message" style="display:none;">
+        <h1 id="modal-h1-foie-gras-ban">California Foie Gras Ban</h1>
+        <p id="modal-p-foie-gras-ban">
+            Dear Customer, This product cannot be shipped to your state. Thank you, The Company
+        </p>
+    </div>
+
+    <script>
+
+        console.log('Foie Gras Ban Rule In Effect');
+
+        var ProductsInCart = [];
+
+        ProductsInCart.push(GetCartProductsArray());
+
+        var BannedProductSKUs = ["FDUFG002", "FDUFG007", "FDUFG007C", "ZDUFG001", "ZDUFG008", "KITFG001", "KITUB001", "PTEFG030", "PTEFG036", "PTEFG036C", "PTEFG020", "PTEFG022", "PTEFG022C", "PTEFG002", "PTEFG006", "PTEFG042", "PTEFG044", "PTEFG044C"];
+
+        var matches = [];
+
+        // console.log('Check ProductsInCart Array: ', ProductsInCart);
+        // console.log('Check BannedProductsSKU Array: ', BannedProductSKUs);
+
+        // Split URL to get SKU //
+        function GetCartProductsArray() {
+            return Array.from(document.querySelectorAll(".mini-cart-product-name a[href*='/product/']"))
+                .map(el => el.href.replace(/^.+product\/(.+?)\.html.*?/i, '$1'))
+        }
+
+        // Compare ProductsInCart with BannedProduct SKUs //
+        function getMatch(a, b) {
+            for (var i = 0; i < a.length; i++) {
+                for (var e = 0; e < b.length; e++) {
+                    if (a[i] === b[e]) matches.push(a[i]);
+                }
+            }
+            return matches;
+        }
+        getMatch(BannedProductSKUs, ProductsInCart[0]);
+
+        var SelectedShipState
+        var selectElement = document.getElementById('ship-state-id');
+        var addressBook = document.getElementById('address-book-id');
+
+        // Change Event: When an address from the address book is selected ...//
+        addressBook.addEventListener('change', (addressEvent) => {
+
+            // ... run this function to get the Ship State //
+            setTimeout(addressFunction, 1000);
+            // addressFunction();
+
+        })
+
+        function addressFunction() {
+            // alert('SetTimeOut worked!')
+            SelectedShipState = this.selectElement.options[selectElement.selectedIndex].value;
+            console.log('address function selected state: ', SelectedShipState);
+            RunFoieGrasRule();
+        }
+
+        // Change Event : Get the option each time it is selected //
+        selectElement.addEventListener('change', (changeEvent) => {
+            SelectedShipState = `${changeEvent.target.value}`;
+            RunFoieGrasRule();
+            console.log('Event Listener Triggered', SelectedShipState)
+
+        })
+
+        function RunFoieGrasRule() {
+            console.log('Sel', SelectedShipState);
+            // console.log('Rule is running');
+            if (SelectedShipState === "CA" && matches.length != 0) {
+
+                // Call modal to appear //
+                FoieGrasBanModal();
+
+                var b = document.querySelector("button.proceedToBilling");
+                // b.setAttribute("id", "ProceedToBillingID");
+                b.setAttribute("disabled", "");
+                b.setAttribute("visibility", "hidden");
+                b.style.visibility = "hidden";
+
+                console.log('FOIE GRAS NOT ALLOWED!');
+            }
+            else {
+                var b = document.querySelector("button.proceedToBilling");
+                // b.setAttribute("id", "ProceedToBillingID");
+                b.removeAttribute("disabled", "");
+                b.style.visibility = "";
+
+                console.log('FOIE GRAS ALLOWED!');
+
+                // Get ID and store in variable
+                var message = document.getElementById("showFoieGrasBanMessage");
+                // Set modal to none
+                message.style.display = "none";
+
+                var deliveryDateSection = document.getElementById("deliveryDateWidgetContainer");
+                deliveryDateSection.style.display = "block";
+
+                var shippingMethodSection = document.getElementById("shipping-method-list");
+                shippingMethodSection.style.display = "block";
+
+            }
+        };
+
+
+        function FoieGrasBanModal() {
+            // alert('Callback working!');
+            var modal = document.getElementById("showFoieGrasBanModal");
+
+            // If modal is set to 'display: none;' set to 'display: flex;'
+            if (modal.style.display === "none") {
+                modal.style.display = "flex";
+            }
+
+            // Scroll user to the top of the screen //
+            window.scrollTo(0, 0);
+
+        }
+
+        function CloseModalFunction() {
+            // Get ID and store in variable
+            var modal = document.getElementById("showFoieGrasBanModal");
+            // Set modal to none
+            modal.style.display = "none";
+
+            // var formRow = document.getElementsByClassName("div.form-row");
+
+            // Get ID and store in variable
+            var message = document.getElementById("showFoieGrasBanMessage");
+            message.style.display = "block";
+
+            // var fragment = document.createDocumentFragment();
+            var fragment = document.createElement("div");
+            fragment.appendChild(message);
+            // var formRow = document.querySelector("div.gift-message-text");
+            // formRow.setAttribute("id", "formRowID");
+            document.getElementById('dwfrm_singleshipping_shippingAddress').appendChild(fragment);
+
+            var deliveryDateSection = document.getElementById("deliveryDateWidgetContainer");
+            deliveryDateSection.style.display = "none";
+
+            var shippingMethodSection = document.getElementById("shipping-method-list");
+            shippingMethodSection.style.display = "none";
+
+        }
+    </script>
+</body>
+
+</html>
