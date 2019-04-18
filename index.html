@@ -150,33 +150,39 @@
         var SelectedShipState
         var selectElement = document.getElementById('ship-state-id');
         var addressBook = document.getElementById('address-book-id');
-
-        // Change Event: When an address from the address book is selected ...//
-        addressBook.addEventListener('change', (addressEvent) => {
-
+        
+        // Load Event: On load call the addressFunction to check the ship state //
+        window.addEventListener('load', (windowEvent) => {
             // ... run this function to get the Ship State //
             setTimeout(addressFunction, 1000);
-            // addressFunction();
+        });
 
-        })
+        // Change Event: Get the option each time it is selected //
+        selectElement.addEventListener('change', (changeEvent) => {
+            SelectedShipState = `${changeEvent.target.value}`;
+            RunFoieGrasRule();
+            // console.log('Event Listener Triggered', SelectedShipState)
+
+        });
+
+        var addressBook = document.getElementById('dwfrm_singleshipping_addressList');
+        // Change Event: When an address from the address book is selected ...//
+        if (addressBook) {
+            addressBook.addEventListener('change', (addressEvent) => {
+                // ... run this function to get the Ship State //
+                setTimeout(addressFunction, 1000);
+            });
+        }
 
         function addressFunction() {
             // alert('SetTimeOut worked!')
             SelectedShipState = this.selectElement.options[selectElement.selectedIndex].value;
-            console.log('address function selected state: ', SelectedShipState);
+            // console.log('address function selected state: ', SelectedShipState);
             RunFoieGrasRule();
         }
 
-        // Change Event : Get the option each time it is selected //
-        selectElement.addEventListener('change', (changeEvent) => {
-            SelectedShipState = `${changeEvent.target.value}`;
-            RunFoieGrasRule();
-            console.log('Event Listener Triggered', SelectedShipState)
-
-        })
-
         function RunFoieGrasRule() {
-            console.log('Sel', SelectedShipState);
+           // console.log('Sel', SelectedShipState);
             // console.log('Rule is running');
             if (SelectedShipState === "CA" && matches.length != 0) {
 
